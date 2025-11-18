@@ -15,13 +15,12 @@ void init() {
 
 void display() {
     float theta;
-    float radius = 0.25; // 正多邊形的半徑
-
+    float radius = 0.25; 
     glClear(GL_COLOR_BUFFER_BIT);
-    glBegin(GL_LINE_LOOP); // 使用線段連接頂點
+    glBegin(GL_LINE_LOOP); 
 
     for (int i = 0; i < n; i++) {
-        theta = 2.0f * 3.1415926f * i / n; // 計算角度
+        theta = 2.0f * 3.1415926f * i / n;
         float x = radius * cos(theta);
         float y = radius * sin(theta);
         glVertex2f(x, y);
