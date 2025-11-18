@@ -10,7 +10,6 @@
 
 #include "glut.h"
 
-// Define M_PI if not defined
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -48,7 +47,6 @@ bool reachedDestination = false;
 // Add a variable to track if the player has reached the destination
 bool gameWon = false;
 
-// Function declarations
 void initMaze();
 void generateMaze();
 void ensurePathToDestination();
@@ -70,21 +68,18 @@ const int dx[4] = {0, 1, 0, -1};
 const int dz[4] = {-1, 0, 1, 0};
 
 int main(int argc, char** argv) {
-    // Initialize GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("3D Maze");
 
-    // Set callback functions
     glutDisplayFunc(display);
     glutIdleFunc(idle);
     glutKeyboardFunc(keyboard);
     glutReshapeFunc(reshape);
     glutMouseFunc(mouseFunc);
 
-    // Initialize OpenGL settings and maze
     init();
     initMaze();
     generateMaze();
@@ -101,7 +96,6 @@ void init() {
     glShadeModel(GL_SMOOTH);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-    // Enable lighting for better 3D appearance
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
@@ -158,7 +152,6 @@ void display() {
         drawMaze();
         drawPlayer();
     } else {
-        // In bird's-eye view, use a simple 2D rendering approach
         // Save the current matrices
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
@@ -172,7 +165,6 @@ void display() {
         // Draw a 2D representation of the maze
         drawBirdEyeView();
 
-        // Restore the matrices
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
@@ -183,7 +175,6 @@ void display() {
 }
 
 void initMaze() {
-    // Initialize all cells as unvisited with all walls intact
     for (int x = 0; x < MAZE_WIDTH; x++) {
         for (int z = 0; z < MAZE_HEIGHT; z++) {
             maze[x][z].visited = false;
@@ -203,7 +194,6 @@ void initMaze() {
 }
 
 void generateMaze() {
-    // Depth-first search maze generation algorithm
     random_device rd;
     mt19937 gen(rd());
 
@@ -236,9 +226,7 @@ void generateMaze() {
         }
     }
 
-    // We no longer mark perimeter cells as visited - all cells are now part of the maze
 
-    // Start at the designated start cell
     maze[startX][startZ].visited = true;
     cellStack.push(make_pair(startX, startZ));
 
@@ -263,7 +251,6 @@ void generateMaze() {
             // Randomly choose a neighbor
             shuffle(neighbors.begin(), neighbors.end(), gen);
 
-            // Bias toward the destination (occasionally)
             if (rand() % 5 == 0) {  // 20% chance to bias toward destination
                 // Find any neighbor that gets us closer to destination
                 for (size_t i = 0; i < neighbors.size(); i++) {
@@ -310,7 +297,6 @@ void generateMaze() {
         }
     }
 
-    // Ensure there's a path from start to destination
     ensurePathToDestination();
 
     // Set player starting position
@@ -320,7 +306,6 @@ void generateMaze() {
     playerAngle = 0.0f;
 }
 
-// Helper function to ensure a path to destination
 void ensurePathToDestination() {
     // Reset visited flags
     for (int x = 0; x < MAZE_WIDTH; x++) {
@@ -341,12 +326,10 @@ void ensurePathToDestination() {
         int x = current.first;
         int z = current.second;
 
-        // Check if we've reached the destination
         if (x == destX && z == destZ) {
             return;  // Path exists, no need to modify the maze
         }
 
-        // Try all four directions
         for (int dir = 0; dir < 4; dir++) {
             // If there's no wall in this direction
             if (!maze[x][z].walls[dir]) {
@@ -362,31 +345,27 @@ void ensurePathToDestination() {
         }
     }
 
-    // If we get here, there's no path to destination
-    // Create a direct path from somewhere to the destination
     int x = destX;
     int z = destZ;
 
     while (x > 1 || z > 1) {
-        // Decide which direction to move (prefer moving diagonally)
         if (x > 1 && z > 1) {
-            // Remove walls between current and neighbor (move toward start)
             if (rand() % 2 == 0) {
-                maze[x][z].walls[3] = false;      // Remove West wall
-                maze[x - 1][z].walls[1] = false;  // Remove East wall of neighbor
+                maze[x][z].walls[3] = false;     
+                maze[x - 1][z].walls[1] = false;  
                 x--;
             } else {
-                maze[x][z].walls[0] = false;      // Remove North wall
-                maze[x][z - 1].walls[2] = false;  // Remove South wall of neighbor
+                maze[x][z].walls[0] = false;     
+                maze[x][z - 1].walls[2] = false;  
                 z--;
             }
         } else if (x > 1) {
-            maze[x][z].walls[3] = false;      // Remove West wall
-            maze[x - 1][z].walls[1] = false;  // Remove East wall of neighbor
+            maze[x][z].walls[3] = false;      
+            maze[x - 1][z].walls[1] = false;  
             x--;
         } else if (z > 1) {
-            maze[x][z].walls[0] = false;      // Remove North wall
-            maze[x][z - 1].walls[2] = false;  // Remove South wall of neighbor
+            maze[x][z].walls[0] = false;     
+            maze[x][z - 1].walls[2] = false;  
             z--;
         }
     }
@@ -433,37 +412,31 @@ void drawMaze() {
 void drawCell(int x, int z) {
     float wallHeight = 1.0f;
 
-    // Make the walls more visible especially from above
     if (currentView == BIRD_EYE) {
-        // In bird's eye view, draw cell floor with different colors
         if (x == floor(playerX) && z == floor(playerZ)) {
-            // Player's current cell
-            glColor3f(0.7f, 0.7f, 1.0f);  // Light blue for player position
+            glColor3f(0.7f, 0.7f, 1.0f); 
         } else if (x == destX && z == destZ) {
             // Destination cell
-            glColor3f(0.7f, 1.0f, 0.7f);  // Light green for destination
+            glColor3f(0.7f, 1.0f, 0.7f);  
         } else {
             // Regular cell
-            glColor3f(0.7f, 0.7f, 0.7f);  // Light gray for floor
+            glColor3f(0.7f, 0.7f, 0.7f);  
         }
 
-        // Draw cell floor
         glBegin(GL_QUADS);
-        glVertex3f(x, 0.01f, z);  // Slight y offset to prevent z-fighting
+        glVertex3f(x, 0.01f, z);  
         glVertex3f(x + 1.0f, 0.01f, z);
         glVertex3f(x + 1.0f, 0.01f, z + 1.0f);
         glVertex3f(x, 0.01f, z + 1.0f);
         glEnd();
     }
 
-    // Draw walls with enhanced visibility
     if (currentView == BIRD_EYE) {
-        glColor3f(0.0f, 0.0f, 0.8f);  // Darker blue for better contrast in bird's eye
+        glColor3f(0.0f, 0.0f, 0.8f); 
     } else {
-        glColor3f(0.0f, 0.7f, 1.0f);  // Original color for first-person
+        glColor3f(0.0f, 0.7f, 1.0f);  
     }
 
-    // North wall (z-)
     if (maze[x][z].walls[0]) {
         glBegin(GL_QUADS);
         glVertex3f(x, 0.0f, z);
@@ -472,9 +445,8 @@ void drawCell(int x, int z) {
         glVertex3f(x, wallHeight, z);
         glEnd();
 
-        // Add wall top edge for bird's eye visibility
         if (currentView == BIRD_EYE) {
-            glColor3f(0.0f, 0.0f, 0.0f);  // Black for top edges
+            glColor3f(0.0f, 0.0f, 0.0f);  
             glLineWidth(2.0f);
             glBegin(GL_LINES);
             glVertex3f(x, wallHeight, z);
@@ -484,7 +456,6 @@ void drawCell(int x, int z) {
         }
     }
 
-    // East wall (x+)
     if (maze[x][z].walls[1]) {
         if (currentView == BIRD_EYE) {
             glColor3f(0.0f, 0.0f, 0.8f);
@@ -499,7 +470,6 @@ void drawCell(int x, int z) {
         glVertex3f(x + 1.0f, wallHeight, z);
         glEnd();
 
-        // Add wall top edge for bird's eye visibility
         if (currentView == BIRD_EYE) {
             glColor3f(0.0f, 0.0f, 0.0f);
             glLineWidth(2.0f);
@@ -511,7 +481,6 @@ void drawCell(int x, int z) {
         }
     }
 
-    // South wall (z+)
     if (maze[x][z].walls[2]) {
         if (currentView == BIRD_EYE) {
             glColor3f(0.0f, 0.0f, 0.8f);
@@ -526,7 +495,6 @@ void drawCell(int x, int z) {
         glVertex3f(x + 1.0f, 0.0f, z + 1.0f);
         glEnd();
 
-        // Add wall top edge for bird's eye visibility
         if (currentView == BIRD_EYE) {
             glColor3f(0.0f, 0.0f, 0.0f);
             glLineWidth(2.0f);
@@ -538,7 +506,6 @@ void drawCell(int x, int z) {
         }
     }
 
-    // West wall (x-)
     if (maze[x][z].walls[3]) {
         if (currentView == BIRD_EYE) {
             glColor3f(0.0f, 0.0f, 0.8f);
@@ -553,7 +520,6 @@ void drawCell(int x, int z) {
         glVertex3f(x, 0.0f, z + 1.0f);
         glEnd();
 
-        // Add wall top edge for bird's eye visibility
         if (currentView == BIRD_EYE) {
             glColor3f(0.0f, 0.0f, 0.0f);
             glLineWidth(2.0f);
@@ -568,25 +534,20 @@ void drawCell(int x, int z) {
 
 void drawPlayer() {
     if (currentView == BIRD_EYE) {
-        // Draw player as a very visible marker in bird's eye view
         glPushMatrix();
         glTranslatef(playerX, 0.5f, playerZ);
 
-        // Draw a bright red cone pointing in the direction of movement
-        glColor3f(1.0f, 0.0f, 0.0f);  // Bright red
+        glColor3f(1.0f, 0.0f, 0.0f);  
 
-        // Draw a more visible sphere
         glutSolidSphere(0.4f, 16, 16);
 
-        // Direction indicator - clearer arrow
-        glColor3f(1.0f, 1.0f, 0.0f);  // Bright yellow
+        glColor3f(1.0f, 1.0f, 0.0f); 
         glLineWidth(3.0f);
         glBegin(GL_LINES);
         glVertex3f(0.0f, 0.0f, 0.0f);
         glVertex3f(cos(playerAngle) * 0.8f, 0.0f, sin(playerAngle) * 0.8f);
         glEnd();
 
-        // Add arrow head
         glBegin(GL_TRIANGLES);
         float tipX = cos(playerAngle) * 0.8f;
         float tipZ = sin(playerAngle) * 0.8f;
@@ -625,14 +586,14 @@ void keyboard(unsigned char key, int x, int y) {
                 exit(0);
                 break;
         }
-        return;  // Ignore other keys when game is won
+        return;  
     }
 
     // Normal game controls
     switch (key) {
         case 'q':
         case 'Q':
-        case 27:  // ESC key
+        case 27:  
             exit(0);
             break;
 
@@ -641,18 +602,15 @@ void keyboard(unsigned char key, int x, int y) {
             // Move forward
             newX = playerX + cos(playerAngle) * moveSpeed;
             newZ = playerZ + sin(playerAngle) * moveSpeed;
-            // Check for collision
             if (newX > 0 && newX < MAZE_WIDTH && newZ > 0 && newZ < MAZE_HEIGHT) {
                 int cellX = floor(playerX);
                 int cellZ = floor(playerZ);
                 int newCellX = floor(newX);
                 int newCellZ = floor(newZ);
 
-                // Check if we're crossing a wall
                 if (newCellX != cellX) {
                     int wallDir = (newCellX > cellX) ? 1 : 3;
                     if (maze[cellX][cellZ].walls[wallDir]) {
-                        // Hit a wall, don't move in X direction
                         newX = playerX;
                     }
                 }
@@ -660,7 +618,6 @@ void keyboard(unsigned char key, int x, int y) {
                 if (newCellZ != cellZ) {
                     int wallDir = (newCellZ > cellZ) ? 2 : 0;
                     if (maze[cellX][cellZ].walls[wallDir]) {
-                        // Hit a wall, don't move in Z direction
                         newZ = playerZ;
                     }
                 }
@@ -682,11 +639,9 @@ void keyboard(unsigned char key, int x, int y) {
                 int newCellX = floor(newX);
                 int newCellZ = floor(newZ);
 
-                // Check if we're crossing a wall
                 if (newCellX != cellX) {
                     int wallDir = (newCellX > cellX) ? 1 : 3;
                     if (maze[cellX][cellZ].walls[wallDir]) {
-                        // Hit a wall, don't move in X direction
                         newX = playerX;
                     }
                 }
@@ -694,7 +649,6 @@ void keyboard(unsigned char key, int x, int y) {
                 if (newCellZ != cellZ) {
                     int wallDir = (newCellZ > cellZ) ? 2 : 0;
                     if (maze[cellX][cellZ].walls[wallDir]) {
-                        // Hit a wall, don't move in Z direction
                         newZ = playerZ;
                     }
                 }
@@ -709,7 +663,6 @@ void keyboard(unsigned char key, int x, int y) {
             // Strafe left
             newX = playerX + cos(playerAngle - M_PI / 2) * moveSpeed;
             newZ = playerZ + sin(playerAngle - M_PI / 2) * moveSpeed;
-            // Check for collision similarly to forward movement
             if (newX > 0 && newX < MAZE_WIDTH && newZ > 0 && newZ < MAZE_HEIGHT) {
                 int cellX = floor(playerX);
                 int cellZ = floor(playerZ);
@@ -740,7 +693,6 @@ void keyboard(unsigned char key, int x, int y) {
             // Strafe right
             newX = playerX + cos(playerAngle + M_PI / 2) * moveSpeed;
             newZ = playerZ + sin(playerAngle + M_PI / 2) * moveSpeed;
-            // Check for collision similarly to forward movement
             if (newX > 0 && newX < MAZE_WIDTH && newZ > 0 && newZ < MAZE_HEIGHT) {
                 int cellX = floor(playerX);
                 int cellZ = floor(playerZ);
@@ -844,23 +796,19 @@ void mouseFunc(int button, int state, int x, int y) {
     }
 }
 
-// Function to draw a mini-map in first-person view
 void drawMiniMap() {
     // Save current matrices
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0, 800, 0, 600, -1, 1);  // Use screen coordinates
-
+    glOrtho(0, 800, 0, 600, -1, 1);  
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
 
-    // Disable depth testing for 2D overlay
     glDisable(GL_DEPTH_TEST);
 
-    // Draw mini-map background
-    glColor3f(0.1f, 0.1f, 0.1f);  // Dark background instead of semi-transparent
+    glColor3f(0.1f, 0.1f, 0.1f);  
     glBegin(GL_QUADS);
     glVertex2f(10, 10);
     glVertex2f(160, 10);
@@ -868,7 +816,6 @@ void drawMiniMap() {
     glVertex2f(10, 160);
     glEnd();
 
-    // Draw maze walls on mini-map
     float cellSize = 140.0f / MAZE_WIDTH;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {
@@ -962,20 +909,16 @@ void drawMiniMap() {
     glPopMatrix();
 }
 
-// New function to draw a simple 2D bird's-eye view
 void drawBirdEyeView() {
     int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
     int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
 
-    // Calculate cell size to fit maze in window
-    int minDimension = min(windowWidth, windowHeight) - 40;  // Leave some margin
+    int minDimension = min(windowWidth, windowHeight) - 40;  
     float cellSize = minDimension / (float)max(MAZE_WIDTH, MAZE_HEIGHT);
 
-    // Calculate top-left position to center the maze
     float startX = (windowWidth - MAZE_WIDTH * cellSize) / 2;
     float startY = (windowHeight - MAZE_HEIGHT * cellSize) / 2;
 
-    // Draw background
     glColor3f(0.2f, 0.2f, 0.2f);
     glBegin(GL_QUADS);
     glVertex2f(0, 0);
@@ -984,21 +927,16 @@ void drawBirdEyeView() {
     glVertex2f(0, windowHeight);
     glEnd();
 
-    // Draw each cell
     for (int x = 0; x < MAZE_WIDTH; x++) {
         for (int z = 0; z < MAZE_HEIGHT; z++) {
             float cellX = startX + x * cellSize;
             float cellY = startY + z * cellSize;
 
-            // Draw cell floor (white for empty cells)
             if (x == floor(playerX) && z == floor(playerZ)) {
-                // Player cell (blue)
                 glColor3f(0.0f, 0.0f, 0.8f);
             } else if (x == destX && z == destZ) {
-                // Destination cell (green)
                 glColor3f(0.0f, 0.8f, 0.0f);
             } else {
-                // Regular cell (light gray)
                 glColor3f(0.8f, 0.8f, 0.8f);
             }
 
@@ -1009,7 +947,6 @@ void drawBirdEyeView() {
             glVertex2f(cellX, cellY + cellSize);
             glEnd();
 
-            // Draw cell walls (black)
             glColor3f(0.0f, 0.0f, 0.0f);
             glLineWidth(2.0f);
 
@@ -1047,14 +984,11 @@ void drawBirdEyeView() {
         }
     }
 
-    // Draw player as a red circle with direction indicator
     float playerCellX = startX + playerX * cellSize;
     float playerCellY = startY + playerZ * cellSize;
 
-    // Draw red circle for player
     glColor3f(1.0f, 0.0f, 0.0f);
 
-    // Draw a simple filled circle by approximating with a polygon
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(playerCellX, playerCellY);  // center
     float radius = cellSize * 0.3f;
@@ -1064,7 +998,6 @@ void drawBirdEyeView() {
     }
     glEnd();
 
-    // Draw direction indicator
     glColor3f(1.0f, 1.0f, 0.0f);
     glLineWidth(3.0f);
     glBegin(GL_LINES);
@@ -1073,7 +1006,6 @@ void drawBirdEyeView() {
     glEnd();
     glLineWidth(1.0f);
 
-    // Draw text instructions
     glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2f(10, 20);
     const char* text = "Press 'f' to return to first-person view";
@@ -1082,12 +1014,10 @@ void drawBirdEyeView() {
     }
 }
 
-// New function to draw the success screen
 void drawSuccessScreen() {
     int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
     int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
 
-    // Set up 2D orthographic projection
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -1097,7 +1027,6 @@ void drawSuccessScreen() {
     glPushMatrix();
     glLoadIdentity();
 
-    // Draw background
     glColor3f(0.0f, 0.2f, 0.4f);  // Dark blue background
     glBegin(GL_QUADS);
     glVertex2f(0, 0);
@@ -1106,7 +1035,6 @@ void drawSuccessScreen() {
     glVertex2f(0, windowHeight);
     glEnd();
 
-    // Draw success message
     glColor3f(1.0f, 1.0f, 0.0f);  // Yellow text
     const char* congratsText = "Congratulations!";
     const char* successText = "You have successfully completed the maze!";
