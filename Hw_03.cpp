@@ -6,12 +6,11 @@
 #include "glut.h"
 using namespace std;
 
-// 五個自由度變數
-float theta = 0.0f;  // 旋轉角度
-float x = 0.0f;      // X 平移
-float y = 0.0f;      // Y 平移
-float h = 0.2f;      // 垂直連桿高度
-float l = 0.2f;      // 底部支腳間距
+float theta = 0.0f;  
+float x = 0.0f;      
+float y = 0.0f;      
+float h = 0.2f;      
+float l = 0.2f;      
 
 //--------------------------------------------------------------------//
 void idle();
@@ -31,7 +30,6 @@ int main(int argc, char **argv) {
     glutInitWindowPosition(100, 100);
     glutCreateWindow("HW_03");
 
-    // 回呼函式
     glutDisplayFunc(display);
     glutIdleFunc(idle);
     glutKeyboardFunc(keyboard);
@@ -88,7 +86,7 @@ void GripperHeight(int id) {
     switch (id) {
         case 7:
             h = max(0.1f, h - 0.05f);
-            break;  // 最小不要低於 0.1
+            break;  
         case 8:
             h = min(h + 0.05f, 0.6f);
             break;
@@ -113,7 +111,6 @@ void init() {
     glClearDepth(1.0f);
     glDepthFunc(GL_LEQUAL);
 
-    // 建立右鍵選單
     int _Xdirection = glutCreateMenu(Xdirection);
     glutAddMenuEntry("Increase", 1);
     glutAddMenuEntry("Decrease", 2);
@@ -166,10 +163,8 @@ void display() {
 
     glLoadIdentity();
 
-    // 1) 設 Camera
     gluLookAt(5.0, 2.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
-    // 繪出三軸
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_LINES);
     glVertex3f(-2.0, 0.0, 0.0);
@@ -188,17 +183,14 @@ void display() {
     glVertex3f(0.0, 0.0, 2.0);
     glEnd();
 
-    // 全局平移
     glTranslatef(x, y, 0.0f);
 
-    // 第一段基座
     glTranslatef(0.2f, 0.2f, 0.0f);
     glPushMatrix();
     glScalef(0.4f, 0.4f, 0.4f);
     draw_cube();
     glPopMatrix();
 
-    // 第二段手臂 (加入旋轉θ)
     glTranslatef(0.0f, 0.5f, 0.0f);
     glRotatef(theta, 0.0f, 1.0f, 0.0f);
 
@@ -207,35 +199,30 @@ void display() {
     draw_cube();
     glPopMatrix();
 
-    // 第三段手臂
     glTranslatef(0.5f, 0.2f, 0.0f);
     glPushMatrix();
     glScalef(0.8f, 0.2f, 0.2f);
     draw_cube();
     glPopMatrix();
 
-    // 第四段
     glTranslatef(0.3f, -0.2f, 0.0f);
     glPushMatrix();
     glScalef(0.2f, 0.2f, 0.2f);
     draw_cube();
     glPopMatrix();
 
-    // 第五段垂直連桿 (高度由 h 控制)
     glTranslatef(0.0f, -(0.1f + h / 2.0f), 0.0f);
     glPushMatrix();
     glScalef(0.1f, h, 0.1f);
     draw_cube();
     glPopMatrix();
 
-    // 支撐橫樑
     glTranslatef(0.0f, -(h / 2.0f) - 0.05f, 0.0f);
     glPushMatrix();
     glScalef(0.6f, 0.1f, 0.1f);
     draw_cube();
     glPopMatrix();
 
-    // 左右支腳 (間距由 l 控制)
     glPushMatrix();
     glTranslatef(l / 2.0f, -0.15f, 0.0f);
     glScalef(0.1f, 0.2f, 0.1f);
@@ -257,37 +244,31 @@ void keyboard(unsigned char key, GLint x, GLint y) {
 
 void draw_cube() {
     glBegin(GL_QUADS);
-    // 前面
     glColor3f(1, 0, 0);
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glVertex3f(0.5f, -0.5f, 0.5f);
     glVertex3f(0.5f, 0.5f, 0.5f);
     glVertex3f(-0.5f, 0.5f, 0.5f);
-    // 後面
     glColor3f(0, 1, 0);
     glVertex3f(-0.5f, -0.5f, -0.5f);
     glVertex3f(-0.5f, 0.5f, -0.5f);
     glVertex3f(0.5f, 0.5f, -0.5f);
     glVertex3f(0.5f, -0.5f, -0.5f);
-    // 左面
     glColor3f(0, 0, 1);
     glVertex3f(-0.5f, -0.5f, -0.5f);
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glVertex3f(-0.5f, 0.5f, 0.5f);
     glVertex3f(-0.5f, 0.5f, -0.5f);
-    // 右面
     glColor3f(1, 1, 0);
     glVertex3f(0.5f, -0.5f, -0.5f);
     glVertex3f(0.5f, 0.5f, -0.5f);
     glVertex3f(0.5f, 0.5f, 0.5f);
     glVertex3f(0.5f, -0.5f, 0.5f);
-    // 上面
     glColor3f(1, 0, 1);
     glVertex3f(-0.5f, 0.5f, -0.5f);
     glVertex3f(-0.5f, 0.5f, 0.5f);
     glVertex3f(0.5f, 0.5f, 0.5f);
     glVertex3f(0.5f, 0.5f, -0.5f);
-    // 下面
     glColor3f(0, 1, 1);
     glVertex3f(-0.5f, -0.5f, -0.5f);
     glVertex3f(0.5f, -0.5f, -0.5f);
@@ -295,3 +276,4 @@ void draw_cube() {
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glEnd();
 }
+
